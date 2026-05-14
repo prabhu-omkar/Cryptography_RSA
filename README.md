@@ -4,7 +4,7 @@
 
 A comprehensive Python implementation of the RSA (Rivest-Shamir-Adleman) public key cryptosystem, featuring an interactive Rich terminal UI with animated visualizations, multiple attack simulations, and benchmarking tools.
 
-Built for **Cyber Security Fundamentals** coursework.
+Built for **Principles and Practices of Cryptography** coursework.
 
 ---
 
@@ -12,15 +12,11 @@ Built for **Cyber Security Fundamentals** coursework.
 
 | # | Feature | Description |
 |---|---------|-------------|
-| 1 | **RSA Encrypt/Decrypt** | Full Alice-Bob communication with character-by-character math breakdown |
-| 2 | **Auto Key Generation** | Generate RSA keys with auto-selected primes (configurable bit sizes) |
-| 3 | **Digital Signatures** | Sign messages with private key, verify with public key, tamper detection |
-| 4 | **Brute-Force Attack** | Trial division factoring simulation — recovers private key from public key |
-| 5 | **MITM Attack** | Man-in-the-Middle simulation — Eve intercepts, reads, and forwards messages |
-| 6 | **Frequency Analysis** | Exposes textbook RSA weakness — identical chars produce identical ciphertext |
-| 7 | **Key Strength Analyzer** | Estimates crack time across Laptop / Server / Supercomputer / All Earth's PCs |
-| 8 | **Benchmark** | Compares key generation, encryption, and decryption speed across key sizes |
-| 9 | **Rich Terminal UI** | Colored panels, tree diagrams, animated network transfer, progress bars |
+| 1 | **RSA Encrypt/Decrypt** | Full Alice-Bob communication with character-by-character math breakdown (custom or auto primes) |
+| 2 | **Digital Signatures** | Sign messages with private key, verify with public key, tamper detection |
+| 3 | **Brute-Force Attack** | Trial division factoring simulation -- recovers private key from public key |
+| 4 | **Key Strength & Benchmark** | Estimates crack time + compares key generation, encryption, and decryption speed across key sizes |
+| 5 | **Rich Terminal UI** | Colored panels, tree diagrams, animated network transfer, progress bars |
 
 ---
 
@@ -80,7 +76,7 @@ cryptography/
 
 | File | Lines | Role |
 |------|-------|------|
-| `rsa_engine.py` | ~400 | All RSA math: Miller-Rabin primality, key generation, modular exponentiation, encryption, decryption, digital signatures, brute-force factoring, MITM attack, frequency analysis, key strength estimation, benchmarking |
+| `rsa_engine.py` | ~400 | All RSA math: Miller-Rabin primality, key generation, modular exponentiation, encryption, decryption, digital signatures, brute-force factoring, frequency analysis, key strength estimation, benchmarking |
 | `rsa_visualizer.py` | ~340 | Rich terminal rendering: colorized panels, tree views, encryption/decryption tables, animated network transfer, attack result displays, benchmark comparison charts |
 | `main.py` | ~330 | Application entry point: interactive menu loop, user input validation, demo orchestration connecting engine and visualizer |
 | `rsa_crypto.py` | ~230 | Self-contained RSA implementation with zero external dependencies — runs on any Python install |
@@ -120,15 +116,11 @@ python rsa_crypto.py
 ## Interactive Menu
 
 ```
-1   Full Demo -- Encrypt & Decrypt with custom primes
-2   Full Demo -- Auto-generate primes
-3   Digital Signature -- Sign & Verify a message
-4   Brute-Force Attack -- Crack a key
-5   MITM Attack -- Man-in-the-Middle simulation
-6   Frequency Analysis -- Expose textbook RSA weakness
-7   Key Strength Analyzer -- Estimate crack time
-8   Benchmark -- Compare different key sizes
-9   Run Automated Test Cases
+1   Full Demo -- Encrypt & Decrypt (custom or auto primes)
+2   Digital Signature -- Sign & Verify a message
+3   Brute-Force Attack -- Crack a key
+4   Key Strength & Benchmark -- Analyze and compare key sizes
+5   Run Automated Test Cases
 0   Exit
 ```
 
@@ -193,20 +185,8 @@ DECRYPTION: M = C^d mod n
 ### Brute-Force Factoring
 Demonstrates trial division attack on small RSA keys. Given primes by the user, the program generates a key pair, then attempts to factor `n` back into `p` and `q`, recovering the private key.
 
-### Man-in-the-Middle (MITM)
-Simulates Eve intercepting the key exchange between Alice and Bob:
-1. Eve generates her own key pair
-2. Eve gives Alice her public key instead of Bob's
-3. Alice encrypts with Eve's key — Eve reads the message
-4. Eve re-encrypts with Bob's real key and forwards
-5. Bob decrypts normally, unaware of the interception
 
-**Lesson:** This is why certificate authorities and key authentication exist.
 
-### Frequency Analysis
-Shows that textbook RSA (per-character encryption) produces identical ciphertext for identical plaintext characters. An attacker can use statistical frequency patterns (like `'e'` being the most common English letter) to break the cipher without the private key.
-
-**Lesson:** This is why production RSA uses OAEP padding and block cipher modes.
 
 ---
 
@@ -254,7 +234,7 @@ All other functionality uses Python standard library modules (`hashlib`, `random
 
 ## Testing
 
-The automated test suite (menu option 9) runs 3 test cases with progressively larger primes:
+The automated test suite (menu option 5) runs 3 test cases with progressively larger primes:
 
 | Test | Message | Primes (p, q) | Modulus Size |
 |------|---------|---------------|--------------|

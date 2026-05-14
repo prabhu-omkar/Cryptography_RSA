@@ -228,29 +228,7 @@ def display_verification(original, decrypted):
         return False
 
 
-def display_mitm_result(result):
-    """Display Man-in-the-Middle attack simulation results."""
-    # Step-by-step flow
-    table = Table(box=box.ROUNDED, show_header=False, title="[bold]Attack Flow[/]")
-    table.add_column("Step", style="bold", width=6)
-    table.add_column("Actor", style="bold cyan", width=12)
-    table.add_column("Action", width=50)
 
-    table.add_row("1", "Alice", f"Sends: [white]{result['original']}[/]")
-    ct_short = str(result['ciphertext_intercepted'][:3]) + "..."
-    table.add_row("2", "Alice", f"Encrypts with [red]Eve's key[/] (thinks it's Bob's)")
-    table.add_row("3", "[red]Eve[/]", f"Intercepts ciphertext: [yellow]{ct_short}[/]")
-    table.add_row("4", "[red]Eve[/]", f"Decrypts: [bold red]{result['eve_decrypted']}[/]")
-    table.add_row("5", "[red]Eve[/]", "Re-encrypts with Bob's real key, forwards")
-    table.add_row("6", "Bob", f"Decrypts: [green]{result['bob_decrypted']}[/]")
-
-    console.print(Panel(table, title="[bold red]Man-in-the-Middle Attack[/]",
-                        border_style="red", box=box.DOUBLE))
-
-    # Outcome
-    console.print(f"  Eve read the message: [bold red]YES -- \"{result['eve_decrypted']}\"[/]")
-    console.print(f"  Bob received original: [bold green]YES -- unaware of interception[/]")
-    console.print(f"\n  [bold yellow]>> This is why key authentication (certificates) matters![/]\n")
 
 
 def display_frequency_analysis(analysis, ciphertext):
@@ -346,9 +324,8 @@ def show_menu():
     menu.add_row("1", "Full Demo -- Encrypt & Decrypt (custom or auto primes)")
     menu.add_row("2", "Digital Signature -- Sign & Verify a message")
     menu.add_row("3", "Brute-Force Attack -- Crack a key")
-    menu.add_row("4", "MITM Attack -- Man-in-the-Middle simulation")
-    menu.add_row("5", "Key Strength & Benchmark -- Analyze and compare key sizes")
-    menu.add_row("6", "Run Automated Test Cases")
+    menu.add_row("4", "Key Strength & Benchmark -- Analyze and compare key sizes")
+    menu.add_row("5", "Run Automated Test Cases")
     menu.add_row("0", "Exit")
     console.print(Align.center(menu))
     console.print()

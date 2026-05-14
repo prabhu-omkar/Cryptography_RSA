@@ -12,12 +12,13 @@ if sys.stdout.encoding != 'utf-8':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
+from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rsa_engine import (
     miller_rabin, generate_keys, encrypt, decrypt,
     text_to_numbers, sign_message, verify_signature,
     brute_force_factor, benchmark_keygen, mod_exp,
-    mitm_attack, analyze_key_strength
+    analyze_key_strength
 )
 from rsa_visualizer import (
     console, display_banner, display_key_generation,
@@ -25,7 +26,7 @@ from rsa_visualizer import (
     display_decryption_table, display_signature_result,
     display_attack_result, display_benchmark_table,
     display_verification, show_menu,
-    display_mitm_result, display_key_strength
+    display_key_strength
 )
 
 
@@ -33,7 +34,7 @@ from rsa_visualizer import (
 # DEMO FUNCTIONS
 # ─────────────────────────────────────────────────────────────
 
-def run_full_demo(message, p=None, q=None, bits=16):
+def run_full_demo(message, p=None, q=None, bits=10):
     """Run the complete Alice-Bob communication demo."""
     with Progress(SpinnerColumn(), TextColumn("[bold blue]Bob is generating RSA keys..."),
                   console=console, transient=True) as progress:
@@ -58,11 +59,11 @@ def run_full_demo(message, p=None, q=None, bits=16):
     display_verification(message, decrypted)
 
 
-def run_signature_demo(message, bits=16):
+def run_signature_demo(message, p=None, q=None, bits=10):
     """Demonstrate digital signature signing and verification."""
     console.print("\n[bold magenta]-- Digital Signature Demo --[/]\n")
 
-    public_key, private_key, params = generate_keys(bits=bits)
+    public_key, private_key, params = generate_keys(p, q, bits=bits)
     display_key_generation(params)
 
     signature, msg_hash = sign_message(message, private_key)
@@ -104,22 +105,6 @@ def run_attack_demo(p, q):
         console.print()
 
 
-def run_mitm_demo(message):
-    """Run Man-in-the-Middle attack simulation."""
-    console.print("\n[bold red]-- Man-in-the-Middle Attack --[/]\n")
-
-    console.print("[bold cyan]Bob's Key Pair:[/]")
-    bob_pub, bob_priv, bob_params = generate_keys(bits=16)
-    display_key_generation(bob_params)
-
-    console.print("\n[bold red]Eve's Key Pair (attacker):[/]")
-    eve_pub, eve_priv, eve_params = generate_keys(bits=16)
-    display_key_generation(eve_params)
-
-    console.print("\n[dim]Eve intercepts the key exchange and gives Alice her own public key...[/]\n")
-
-    result = mitm_attack(message, bob_pub, bob_priv, eve_pub, eve_priv)
-    display_mitm_result(result)
 
 
 def run_key_strength_and_benchmark(p, q):
@@ -256,13 +241,6 @@ def main():
             run_attack_demo(p, q)
 
         elif choice == '4':
-            msg = console.input("  [cyan]Enter message for MITM demo: [/]")
-            if not msg:
-                console.print("[red]  Empty message.[/]")
-                continue
-            run_mitm_demo(msg)
-
-        elif choice == '5':
             try:
                 p = int(console.input("  [cyan]Enter prime p: [/]"))
                 q = int(console.input("  [cyan]Enter prime q: [/]"))
@@ -274,7 +252,7 @@ def main():
                 continue
             run_key_strength_and_benchmark(p, q)
 
-        elif choice == '6':
+        elif choice == '5':
             run_automated_tests()
 
         elif choice == '0':
