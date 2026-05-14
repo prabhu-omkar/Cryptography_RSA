@@ -12,14 +12,12 @@ if sys.stdout.encoding != 'utf-8':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
-from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rsa_engine import (
     miller_rabin, generate_keys, encrypt, decrypt,
     text_to_numbers, sign_message, verify_signature,
     brute_force_factor, benchmark_keygen, mod_exp,
-    mitm_attack,
-    analyze_key_strength, frequency_analysis
+    mitm_attack, analyze_key_strength
 )
 from rsa_visualizer import (
     console, display_banner, display_key_generation,
@@ -27,8 +25,7 @@ from rsa_visualizer import (
     display_decryption_table, display_signature_result,
     display_attack_result, display_benchmark_table,
     display_verification, show_menu,
-    display_mitm_result, display_frequency_analysis,
-    display_key_strength
+    display_mitm_result, display_key_strength
 )
 
 
@@ -36,7 +33,7 @@ from rsa_visualizer import (
 # DEMO FUNCTIONS
 # ─────────────────────────────────────────────────────────────
 
-def run_full_demo(message, p=None, q=None, bits=10):
+def run_full_demo(message, p=None, q=None, bits=16):
     """Run the complete Alice-Bob communication demo."""
     with Progress(SpinnerColumn(), TextColumn("[bold blue]Bob is generating RSA keys..."),
                   console=console, transient=True) as progress:
@@ -61,11 +58,11 @@ def run_full_demo(message, p=None, q=None, bits=10):
     display_verification(message, decrypted)
 
 
-def run_signature_demo(message, p=None, q=None, bits=10):
+def run_signature_demo(message, bits=16):
     """Demonstrate digital signature signing and verification."""
     console.print("\n[bold magenta]-- Digital Signature Demo --[/]\n")
 
-    public_key, private_key, params = generate_keys(p, q, bits=bits)
+    public_key, private_key, params = generate_keys(bits=bits)
     display_key_generation(params)
 
     signature, msg_hash = sign_message(message, private_key)
@@ -111,12 +108,10 @@ def run_mitm_demo(message):
     """Run Man-in-the-Middle attack simulation."""
     console.print("\n[bold red]-- Man-in-the-Middle Attack --[/]\n")
 
-    # Generate Bob's keys
     console.print("[bold cyan]Bob's Key Pair:[/]")
     bob_pub, bob_priv, bob_params = generate_keys(bits=16)
     display_key_generation(bob_params)
 
-    # Generate Eve's keys (the attacker)
     console.print("\n[bold red]Eve's Key Pair (attacker):[/]")
     eve_pub, eve_priv, eve_params = generate_keys(bits=16)
     display_key_generation(eve_params)
@@ -127,23 +122,9 @@ def run_mitm_demo(message):
     display_mitm_result(result)
 
 
-def run_frequency_demo(message):
-    """Run frequency analysis attack demo."""
-    console.print("\n[bold red]-- Frequency Analysis Attack --[/]\n")
-
-    public_key, private_key, params = generate_keys(bits=16)
-    display_key_generation(params)
-
-    console.print(f"\n[dim]Encrypting: \"{message}\"[/]\n")
-    ciphertext = encrypt(message, public_key)
-
-    console.print("[dim]Attacker intercepts ciphertext and analyzes patterns...[/]\n")
-    analysis = frequency_analysis(ciphertext, plaintext=message)
-    display_frequency_analysis(analysis, ciphertext)
-
-
-def run_key_strength_demo(p, q):
-    """Run key strength analysis."""
+def run_key_strength_and_benchmark(p, q):
+    """Run key strength analysis followed by benchmark comparison."""
+    # Part 1: Key Strength Analysis
     console.print("\n[bold magenta]-- Key Strength Analyzer --[/]\n")
 
     public_key, private_key, params = generate_keys(p, q)
@@ -153,14 +134,12 @@ def run_key_strength_demo(p, q):
     console.print()
     display_key_strength(analysis)
 
-    # Also show what 2048-bit RSA would look like
+    # 2048-bit RSA comparison
     console.print("\n[bold yellow]For comparison -- estimated 2048-bit RSA crack time:[/]")
     fake_2048 = analyze_key_strength(2**2048)
     display_key_strength(fake_2048)
 
-
-def run_benchmark():
-    """Run benchmark across different key sizes."""
+    # Part 2: Benchmark across key sizes
     console.print("\n[bold blue]-- Key Size Benchmark --[/]\n")
     bit_sizes = [8, 10, 12, 16, 20, 24, 28]
     results = []
@@ -180,7 +159,7 @@ def run_benchmark():
 
     display_benchmark_table(results)
 
-    # Show factoring difficulty comparison (cap at 28-bit to avoid long waits)
+    # Factoring difficulty comparison
     console.print("\n[bold yellow]Factoring Difficulty:[/]")
     for r in results:
         if r['n'] > 0 and r['bits'] <= 28:
@@ -222,42 +201,46 @@ def main():
         choice = console.input("[bold yellow]  Enter choice -> [/]").strip()
 
         if choice == '1':
-            try:
-                p = int(console.input("  [cyan]Enter prime p: [/]"))
-                q = int(console.input("  [cyan]Enter prime q: [/]"))
-            except ValueError:
-                console.print("[red]  Invalid number.[/]")
-                continue
-            if not miller_rabin(p) or not miller_rabin(q):
-                console.print("[red]  One or both numbers are not prime.[/]")
-                continue
-            if p == q:
-                console.print("[red]  p and q must be different.[/]")
-                continue
-            if p * q < 128:
-                console.print("[red]  n=p*q too small. Use larger primes.[/]")
-                continue
-            msg = console.input("  [cyan]Enter message: [/]")
-            if not msg:
-                console.print("[red]  Empty message.[/]")
-                continue
-            run_full_demo(msg, p=p, q=q)
+            # Ask: custom primes or auto-generated?
+            mode = console.input("  [cyan]Use custom primes? (y/n): [/]").strip().lower()
+
+            if mode == 'y':
+                try:
+                    p = int(console.input("  [cyan]Enter prime p: [/]"))
+                    q = int(console.input("  [cyan]Enter prime q: [/]"))
+                except ValueError:
+                    console.print("[red]  Invalid number.[/]")
+                    continue
+                if not miller_rabin(p) or not miller_rabin(q):
+                    console.print("[red]  One or both numbers are not prime.[/]")
+                    continue
+                if p == q:
+                    console.print("[red]  p and q must be different.[/]")
+                    continue
+                if p * q < 128:
+                    console.print("[red]  n=p*q too small. Use larger primes.[/]")
+                    continue
+                msg = console.input("  [cyan]Enter message: [/]")
+                if not msg:
+                    console.print("[red]  Empty message.[/]")
+                    continue
+                run_full_demo(msg, p=p, q=q)
+            else:
+                msg = console.input("  [cyan]Enter message: [/]")
+                if not msg:
+                    console.print("[red]  Empty message.[/]")
+                    continue
+                console.print("  [dim]Auto-generating 16-bit primes...[/]")
+                run_full_demo(msg, bits=16)
 
         elif choice == '2':
-            msg = console.input("  [cyan]Enter message: [/]")
-            if not msg:
-                console.print("[red]  Empty message.[/]")
-                continue
-            run_full_demo(msg, bits=16)
-
-        elif choice == '3':
             msg = console.input("  [cyan]Enter message to sign: [/]")
             if not msg:
                 console.print("[red]  Empty message.[/]")
                 continue
             run_signature_demo(msg, bits=16)
 
-        elif choice == '4':
+        elif choice == '3':
             try:
                 p = int(console.input("  [cyan]Enter prime p: [/]"))
                 q = int(console.input("  [cyan]Enter prime q: [/]"))
@@ -272,21 +255,14 @@ def main():
                 continue
             run_attack_demo(p, q)
 
-        elif choice == '5':
+        elif choice == '4':
             msg = console.input("  [cyan]Enter message for MITM demo: [/]")
             if not msg:
                 console.print("[red]  Empty message.[/]")
                 continue
             run_mitm_demo(msg)
 
-        elif choice == '6':
-            msg = console.input("  [cyan]Enter message (use repeated chars for best demo): [/]")
-            if not msg:
-                console.print("[red]  Empty message.[/]")
-                continue
-            run_frequency_demo(msg)
-
-        elif choice == '7':
+        elif choice == '5':
             try:
                 p = int(console.input("  [cyan]Enter prime p: [/]"))
                 q = int(console.input("  [cyan]Enter prime q: [/]"))
@@ -296,12 +272,9 @@ def main():
             if not miller_rabin(p) or not miller_rabin(q):
                 console.print("[red]  One or both numbers are not prime.[/]")
                 continue
-            run_key_strength_demo(p, q)
+            run_key_strength_and_benchmark(p, q)
 
-        elif choice == '8':
-            run_benchmark()
-
-        elif choice == '9':
+        elif choice == '6':
             run_automated_tests()
 
         elif choice == '0':

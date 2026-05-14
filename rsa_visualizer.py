@@ -95,10 +95,10 @@ def animate_network_transfer(ciphertext):
         "[green]Alice[/] ------------------[bold yellow]>> ENCRYPTED DATA[/]----  [dim]Bob[/]",
         "[green]Alice[/] --------------------[bold yellow]>> ENCRYPTED DATA[/]-- [bold cyan]Bob[/]",
     ]
-    with Live(console=console, refresh_per_second=8) as live:
+    with Live(console=console, refresh_per_second=4) as live:
         for frame in frames:
             live.update(Align.center(Text.from_markup(frame)))
-            time.sleep(0.18)
+            time.sleep(0.4)
     console.print(Align.center(Text.from_markup(
         "[bold green][OK] Ciphertext delivered securely[/]"
     )))
@@ -343,15 +343,12 @@ def show_menu():
     menu = Table(box=box.SIMPLE, show_header=False, padding=(0, 2))
     menu.add_column("Option", style="bold yellow", justify="center")
     menu.add_column("Description", style="white")
-    menu.add_row("1", "Full Demo -- Encrypt & Decrypt with custom primes")
-    menu.add_row("2", "Full Demo -- Auto-generate primes")
-    menu.add_row("3", "Digital Signature -- Sign & Verify a message")
-    menu.add_row("4", "Brute-Force Attack -- Crack a key")
-    menu.add_row("5", "MITM Attack -- Man-in-the-Middle simulation")
-    menu.add_row("6", "Frequency Analysis -- Expose textbook RSA weakness")
-    menu.add_row("7", "Key Strength Analyzer -- Estimate crack time")
-    menu.add_row("8", "Benchmark -- Compare different key sizes")
-    menu.add_row("9", "Run Automated Test Cases")
+    menu.add_row("1", "Full Demo -- Encrypt & Decrypt (custom or auto primes)")
+    menu.add_row("2", "Digital Signature -- Sign & Verify a message")
+    menu.add_row("3", "Brute-Force Attack -- Crack a key")
+    menu.add_row("4", "MITM Attack -- Man-in-the-Middle simulation")
+    menu.add_row("5", "Key Strength & Benchmark -- Analyze and compare key sizes")
+    menu.add_row("6", "Run Automated Test Cases")
     menu.add_row("0", "Exit")
     console.print(Align.center(menu))
     console.print()

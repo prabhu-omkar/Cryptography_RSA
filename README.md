@@ -55,7 +55,7 @@ C = M^e mod n                         M = C^d mod n
       |           <--- Public Key (e, n) ---            |
       |                                                 |
       |  (2) Alice encrypts: C = M^e mod n              |
-      |           --- Ciphertext C --->                  |
+      |           --- Ciphertext C --->                 |
       |                                                 |
       |            (3) Bob decrypts: M = C^d mod n      |
       |                                                 |
