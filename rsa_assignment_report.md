@@ -2,8 +2,8 @@
 
 ## Secure Communication Between Alice & Bob
 
-**Course:** Cyber Security Fundamentals  
-**Topic:** Public Key Cryptography (RSA Algorithm)  
+**Course:** Principles and Practices of Cryptography  
+**Topic:** Public Key Cryptography (RSA Algorithm) & Advanced Attack Simulations  
 **Date:** May 2026
 
 ---
@@ -11,234 +11,95 @@
 ## 1. Introduction & Theory
 
 ### What is RSA?
-RSA (Rivest–Shamir–Adleman) is an **asymmetric encryption algorithm** that uses two mathematically linked keys — a **public key** for encryption and a **private key** for decryption. Unlike symmetric cryptography (where both parties share one secret key), RSA allows secure communication without ever sharing a secret key over the network.
+RSA (Rivest–Shamir–Adleman) is a foundational **asymmetric encryption algorithm** that utilizes two mathematically linked keys — a **public key** for encryption and a **private key** for decryption. Unlike symmetric cryptography (where both parties share one secret key), RSA allows secure communication without ever transmitting a shared secret over the network.
 
-### Why Asymmetric Cryptography?
-In symmetric systems, the shared secret key must be transmitted securely — a chicken-and-egg problem. RSA solves this by allowing Bob to publish his public key openly. Anyone (including Alice) can encrypt a message with it, but **only Bob** can decrypt it with his private key.
+### The Asymmetric Advantage
+In symmetric systems, the shared secret key must be transmitted securely — creating a classic chicken-and-egg problem. RSA solves this by allowing Bob to publish his public key openly. Anyone (including Alice) can encrypt a message with it, but **only Bob** can decrypt it using his mathematically linked private key. 
 
 ### Mathematical Foundation
-RSA's security rests on the **difficulty of factoring large composite numbers**. Given `n = p × q` (where p and q are large primes), it is computationally infeasible to recover p and q from n alone.
+RSA's security rests on the **Integer Factorization Problem**. Given a modulus `n = p × q` (where `p` and `q` are large primes), it is computationally infeasible for an adversary to recover the original prime factors from `n` alone.
 
 ---
 
-## 2. Algorithm — Step by Step
+## 2. Implemented Architecture
 
-### Key Generation (Bob)
+The project was developed in Python with a modular, professional architecture focusing on both cryptographic accuracy and educational visualization. 
 
-```
-Step 1:  Select two distinct large prime numbers p and q
-Step 2:  Compute  n = p × q                (the modulus)
-Step 3:  Compute  φ(n) = (p−1) × (q−1)    (Euler's totient)
-Step 4:  Choose   e such that 1 < e < φ(n) and gcd(e, φ(n)) = 1
-Step 5:  Compute  d such that (d × e) ≡ 1 (mod φ(n))
-         → d is the modular inverse of e modulo φ(n)
-
-Public Key  = (e, n)   → shared with Alice
-Private Key = (d, n)   → kept secret by Bob
-```
-
-### Encryption (Alice)
-
-```
-For each character M in the plaintext:
-    C = M^e mod n
-
-where (e, n) is Bob's public key.
-```
-
-### Decryption (Bob)
-
-```
-For each ciphertext block C:
-    M = C^d mod n
-
-where (d, n) is Bob's private key.
-```
+### System Modules
+1. **`rsa_engine.py`**: The cryptographic backend. Contains all mathematical implementations including Miller-Rabin primality testing, square-and-multiply modular exponentiation, the Extended Euclidean algorithm, digital signatures (SHA-256), and brute-force factoring simulations.
+2. **`rsa_visualizer.py`**: The presentation layer. Utilizes the `rich` library to render animated network transfers, encryption/decryption state tables, attack workflows, and colored terminal user interfaces.
+3. **`main.py`**: The orchestration layer. Manages the interactive menu loop, handles user input validation, and connects the cryptographic engine to the visualizer.
 
 ---
 
-## 3. Communication Flow
+## 3. Core Features & Demonstrations
 
-```mermaid
-sequenceDiagram
-    participant Bob
-    participant Alice
-    
-    Bob->>Bob: Generate key pair (public, private)
-    Bob->>Alice: Share public key (e, n)
-    Alice->>Alice: Encrypt message: C = M^e mod n
-    Alice->>Bob: Send ciphertext over network
-    Bob->>Bob: Decrypt: M = C^d mod n
-    Bob->>Bob: Read original message
-```
+The application features 5 core interactive modules designed to demonstrate different aspects of the RSA lifecycle:
 
-| Step | Actor | Action | Data |
-|------|-------|--------|------|
-| 1 | Bob | Generates RSA key pair | Public key (e, n), Private key (d, n) |
-| 2 | Bob → Alice | Shares public key | (e, n) sent openly |
-| 3 | Alice | Encrypts plaintext | C = M^e mod n |
-| 4 | Alice → Bob | Transmits ciphertext | Encrypted integers |
-| 5 | Bob | Decrypts ciphertext | M = C^d mod n |
-| 6 | Bob | Verifies message | Original plaintext recovered |
+### Feature 1: Alice-Bob Full Communication Flow
+Demonstrates the complete lifecycle of an RSA transaction.
+- Bob generates an RSA key pair (either via auto-generated primes or custom user input).
+- Alice receives the public key `(e, n)` and encrypts her message. The system displays a table showing the character-by-character math (`C = M^e mod n`).
+- An animated network transfer visually represents the ciphertext crossing the wire.
+- Bob receives the ciphertext and decrypts it using his private key `(d, n)`, proving that the original message is recovered.
 
----
+### Feature 2: Digital Signatures & Non-Repudiation
+Demonstrates how RSA can be run in reverse to provide authentication.
+- Bob hashes a message using SHA-256.
+- He encrypts the hash with his **private key** to create a signature.
+- Alice uses Bob's **public key** to decrypt the signature and verify the hash.
+- **Tamper Test**: The system simulates altering the message in transit, successfully demonstrating how the signature verification fails, thus ensuring data integrity.
 
-## 4. Implementation Details
+### Feature 3: Brute-Force Factoring Attack
+Demonstrates why key size matters.
+- The user inputs two small primes to generate a weak RSA key.
+- The system plays the role of an attacker who intercepts the public key modulus `n`.
+- Using trial division, the system attacks `n`, successfully factoring it back into `p` and `q`.
+- The attacker then computes the Euler totient and reconstructs the private key `d`, completely breaking the encryption.
 
-### Source File
-[rsa_crypto.py](file:///c:/projects/cryptography/rsa_crypto.py)
+### Feature 4: Key Strength & Performance Benchmarking
+Provides real-world context to cryptographic key lengths.
+- Evaluates a generated key and estimates the time required to crack it across various computing tiers (from a single laptop up to a hypothetical cluster of all computers on Earth).
+- Runs an automated benchmark suite across bit sizes (8-bit up to 28-bit), measuring key generation, encryption, and decryption latency.
+- Highlights the exponential growth in brute-force difficulty as bit size increases.
 
-### Program Structure
-
-| Section | Function | Purpose |
-|---------|----------|---------|
-| Prime Utils | `is_prime()` | Tests primality of a number |
-| Prime Utils | `generate_prime_in_range()` | Generates random prime in range |
-| Math | `gcd()` | Euclidean algorithm for GCD |
-| Math | `mod_inverse()` | Extended Euclidean for modular inverse |
-| Math | `mod_exp()` | Square-and-multiply modular exponentiation |
-| Key Gen | `generate_keys()` | Full RSA key pair generation |
-| Conversion | `text_to_numbers()` | Plaintext → ASCII integer list |
-| Conversion | `numbers_to_text()` | Integer list → plaintext |
-| Encryption | `encrypt()` | RSA encryption using public key |
-| Decryption | `decrypt()` | RSA decryption using private key |
-| Verify | `verify_result()` | Confirms decrypted == original |
-| Test | `run_test_case()` | End-to-end test runner |
-
-### Key Algorithms
-
-**Modular Exponentiation (Square-and-Multiply):**
-Instead of computing `M^e` directly (which would produce astronomically large numbers), we use binary exponentiation — processing the exponent bit by bit, squaring and multiplying modulo n at each step. This keeps intermediate values small and runs in O(log e) time.
-
-**Extended Euclidean Algorithm:**
-Used to compute the private key `d` as the modular inverse of `e` modulo `φ(n)`. It extends the standard Euclidean GCD algorithm to also find coefficients x, y such that `ax + by = gcd(a, b)`.
-
-### Error Handling
-- Validates that user-supplied p and q are actually prime
-- Ensures p ≠ q
-- Checks that n = p×q ≥ 128 (minimum for ASCII characters)
-- Validates each character's ASCII value < n before encryption
-- Asserts the key relationship `(e × d) mod φ(n) = 1` after generation
+### Feature 5: Automated Test Suite
+A regression and correctness suite that runs predefined end-to-end communication scenarios using progressively larger primes (up to 34-bit modulus). Ensures that `decrypt(encrypt(message)) == message` holds true under diverse conditions.
 
 ---
 
-## 5. Sample Outputs
+## 4. Cryptographic Implementation Details
 
-### Test Case 1: "Hello Bob!" (p=61, q=53)
+### Miller-Rabin Primality Test
+Instead of basic trial division, the engine uses the industry-standard Miller-Rabin probabilistic test with 20 rounds of verification. This reduces the false-positive probability to less than $4^{-20}$, ensuring robust prime generation.
 
-```
-Prime p         = 61
-Prime q         = 53
-Modulus n = p*q = 3233
-Euler's phi(n)  = 3120
-Public Key  (e, n) = (17, 3233)
-Private Key (d, n) = (2753, 3233)
+### Square-and-Multiply Exponentiation
+Directly computing $M^e$ for large exponents would cause memory overflow. The implementation utilizes binary modular exponentiation, computing the result bit-by-bit in $O(\log e)$ time.
 
-[ALICE] Original Message : "Hello Bob!"
-[ALICE] Numerical Format : [72, 101, 108, 108, 111, 32, 66, 111, 98, 33]
-[ALICE] Encrypted (sent) : [3000, 1313, 745, 745, 2185, 1992, 524, 2185, 2570, 1853]
-
-[BOB]   Decrypted Message : "Hello Bob!"
-VERIFICATION PASSED: Decrypted output matches original.
-```
-
-### Test Case 2: "RSA 2026" (p=101, q=103)
-
-```
-Modulus n = p*q = 10403
-Public Key  (e, n) = (7, 10403)
-Private Key (d, n) = (8743, 10403)
-
-[ALICE] Original Message : "RSA 2026"
-[ALICE] Encrypted (sent) : [6642, 10355, 623, 2564, 2813, 4472, 2813, 138]
-
-[BOB]   Decrypted Message : "RSA 2026"
-VERIFICATION PASSED
-```
-
-### Test Case 3: "Cyber Security is important!" (p=239, q=251)
-
-```
-Modulus n = p*q = 59989
-Public Key  (e, n) = (3, 59989)
-Private Key (d, n) = (39667, 59989)
-
-[ALICE] Original Message : "Cyber Security is important!"
-[ALICE] Encrypted (sent) : [818, 31880, 41357, 10488, 41808, ...]
-
-[BOB]   Decrypted Message : "Cyber Security is important!"
-VERIFICATION PASSED
-```
-
-### Test Case 4: Special Characters "Key: A1@#$" (p=307, q=311)
-
-```
-Modulus n = p*q = 95477
-Public Key  (e, n) = (65537, 95477)
-
-[ALICE] Original Message : "Key: A1@#$"
-[BOB]   Decrypted Message : "Key: A1@#$"
-VERIFICATION PASSED
-```
-
-### Test Case 5: Auto-Generated Primes
-
-```
-[BOB] primes auto-selected from range [100, 999]
-[ALICE] Original Message : "Auto prime test!"
-[BOB]   Decrypted Message : "Auto prime test!"
-VERIFICATION PASSED
-```
-
-> [!IMPORTANT]
-> All 5 test cases passed — the decrypted output matches the original input in every case, confirming the correctness of the RSA implementation.
+### Extended Euclidean Algorithm
+To compute the private exponent $d$ (where $e \times d \equiv 1 \pmod{\phi(n)}$), the system extends the standard GCD algorithm to find the modular multiplicative inverse efficiently.
 
 ---
 
-## 6. Results & Analysis
+## 5. Security Analysis & Educational Value
 
-| Test | Message | Primes (p, q) | n | Key Size | Result |
-|------|---------|---------------|---|----------|--------|
-| 1 | Hello Bob! | 61, 53 | 3,233 | 12-bit | ✓ Pass |
-| 2 | RSA 2026 | 101, 103 | 10,403 | 14-bit | ✓ Pass |
-| 3 | Cyber Security is important! | 239, 251 | 59,989 | 16-bit | ✓ Pass |
-| 4 | Key: A1@#$ | 307, 311 | 95,477 | 17-bit | ✓ Pass |
-| 5 | Auto prime test! | Auto | Auto | Varies | ✓ Pass |
+### Textbook RSA vs. Production RSA
+This system implements **Textbook RSA**, meaning it performs deterministic, per-character encryption. While mathematically identical to production RSA, it lacks padding.
 
-### Key Observations
+| Aspect | This Implementation | Production RSA |
+|--------|---------------------|----------------|
+| **Padding** | None (Deterministic) | OAEP (PKCS#1 v2.2) |
+| **Key Size** | 16-bit to 56-bit | 2048-bit to 4096-bit |
+| **Prime Gen** | Miller-Rabin | CSPRNG + Miller-Rabin |
+| **Block Mode**| Per-Character | Padded Blocks |
 
-1. **Correctness**: Every decrypted message exactly matches the original plaintext, proving the mathematical relationship `M = (M^e)^d mod n` holds.
-2. **Character Encoding**: Each character is independently encrypted using its ASCII code point, requiring `n > 127` at minimum.
-3. **Key Sizes**: Larger primes produce larger n, enabling encryption of higher Unicode values and providing stronger security.
-4. **Performance**: The square-and-multiply algorithm makes modular exponentiation efficient even for large exponents.
-
----
-
-## 7. Security Considerations
-
-| Aspect | This Demo | Production RSA |
-|--------|-----------|----------------|
-| Key Size | 12–17 bit | 2048–4096 bit |
-| Prime Selection | Random in [100, 999] | Cryptographically secure random |
-| Padding | None (textbook RSA) | OAEP (PKCS#1 v2.2) |
-| Block Mode | Per-character | Block-based with padding |
-
-> [!NOTE]
-> This implementation is for **educational purposes**. Production RSA uses much larger primes (1024+ bits each), secure padding schemes (like OAEP), and established cryptographic libraries.
+### Lessons Learned
+1. **The Necessity of Padding:** Textbook RSA is vulnerable to frequency analysis and chosen-plaintext attacks. Real systems must inject randomness (padding) into the plaintext before encryption.
+2. **Computational Complexity:** The benchmarking module proves that while encryption time grows linearly with key size, the difficulty of factoring $n$ grows exponentially, highlighting the fundamental premise of asymmetric security.
+3. **Authentication:** Encryption provides confidentiality, but digital signatures provide authenticity and integrity. Both are required for a secure channel.
 
 ---
 
-## 8. Conclusion
+## 6. Conclusion
 
-This assignment successfully demonstrates:
-
-- ✅ Understanding of RSA theory and public key cryptography
-- ✅ Key generation by selecting two primes and computing public/private keys
-- ✅ Encryption and decryption based on modular exponentiation
-- ✅ User input acceptance and text-to-number conversion
-- ✅ Verification that decrypted output matches original input
-- ✅ Testing with multiple sample inputs (5 automated + interactive mode)
-- ✅ Well-structured, commented code with error handling
-- ✅ Documentation of implementation steps and results
-
-The RSA algorithm provides a mathematically sound framework for asymmetric encryption, enabling Alice and Bob to communicate securely without sharing a private key — the cornerstone of modern internet security (HTTPS, digital signatures, secure email).
+This project successfully fulfills the assignment requirements by building a mathematically sound, fully functional RSA cryptosystem from scratch. By extending the requirements to include a professional terminal UI, digital signatures, brute-force simulations, and benchmarking tools, the project serves as a comprehensive educational platform for understanding both the strengths and vulnerabilities of public-key cryptography.
