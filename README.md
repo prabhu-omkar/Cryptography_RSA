@@ -16,7 +16,6 @@ Built for **Principles and Practices of Cryptography** coursework.
 | 2 | **Digital Signatures** | Sign messages with private key, verify with public key, tamper detection |
 | 3 | **Brute-Force Attack** | Trial division factoring simulation -- recovers private key from public key |
 | 4 | **Key Strength & Benchmark** | Estimates crack time + compares key generation, encryption, and decryption speed across key sizes |
-| 5 | **Rich Terminal UI** | Colored panels, tree diagrams, animated network transfer, progress bars |
 
 ---
 
@@ -48,12 +47,12 @@ C = M^e mod n                         M = C^d mod n
   +-------+                                          +-----+
       |                                                 |
       |            (1) Bob generates key pair           |
-      |           <--- Public Key (e, n) ---            |
+      |            <--- Public Key (e, n) ---           |
       |                                                 |
-      |  (2) Alice encrypts: C = M^e mod n              |
-      |           --- Ciphertext C --->                 |
+      |        (2) Alice encrypts: C = M^e mod n        |
+      |              --- Ciphertext C --->              |
       |                                                 |
-      |            (3) Bob decrypts: M = C^d mod n      |
+      |         (3) Bob decrypts: M = C^d mod n         |
       |                                                 |
 ```
 
@@ -248,4 +247,4 @@ All tests verify that `decrypt(encrypt(message)) == message`.
 
 ## License
 
-This project is part of academic coursework for Cyber Security Fundamentals. Free to use for educational purposes.
+This project is part of academic coursework for Principles and Practices of Cryptography. Free to use for educational purposes.
