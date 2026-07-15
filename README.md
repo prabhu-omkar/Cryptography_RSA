@@ -225,7 +225,7 @@ For comparison, a **2048-bit RSA key** would take longer than the age of the uni
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| `rich` | >= 13.0 | Terminal UI: panels, tables, progress bars, colors |
+| `rich` | >= 13.0 | Terminal UI: panels, progress bars, colors |
 
 All other functionality uses Python standard library modules (`hashlib`, `random`, `time`, `math`, `collections`).
 
